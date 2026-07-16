@@ -5,13 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>పాలేటూరు రుచులు - Order App</title>
     <style>
-        /* పాత స్క్రీన్లు అన్నీ దాచేసి, కేవలం active ఉన్నదాన్ని చూపించే మ్యాజిక్ కోడ్ */
-.screen {
-    display: none;
-}
-.screen.active {
-    display: block !important;
-}
         :root {
             --primary: #2b6cb0;
             --accent: #dd6b20;
@@ -26,9 +19,14 @@
         h2 { margin: 10px 0 5px 0; color: var(--primary); text-align: center; }
         .brand-subtitle { text-align: center; color: var(--accent); font-weight: bold; margin-bottom: 25px; }
         
-        /* Screens View Management */
-        .screen { display: none; }
-        .screen.active { display: block; animation: fadeIn 0.4s ease-in-out; }
+        /* Screens View Management (సింగిల్ పేజీ అప్లికేషన్ రూటింగ్ పక్కాగా రన్ అవ్వడానికి) */
+        .screen { 
+            display: none !important; 
+        }
+        .screen.active { 
+            display: block !important; 
+            animation: fadeIn 0.4s ease-in-out; 
+        }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Page 1: Login Form */
@@ -104,6 +102,12 @@
         <div class="bill-box">
             <span>మొత్తం బిల్లు (Total Bill):</span>
             <span style="color: var(--primary)">₹<span id="totalDisplay">0</span>/-</span>
+        </div>
+
+        <!-- కస్టమర్ మొబైల్ నెంబర్ ఎంటర్ చేయడానికి కొత్త ఫీల్డ్ -->
+        <div class="form-group">
+            <label style="font-weight: bold;">📞 మొబైల్ నంబర్ (Mobile Number):</label>
+            <input type="text" id="customerMobile" placeholder="మీ మొబైల్ నెంబర్ ఎంటర్ చేయండి" value="9876543210">
         </div>
 
         <div class="form-group">
@@ -255,8 +259,13 @@
     // Page 2 -> Go to Payment Page
     function goToPaymentPage() {
         const address = document.getElementById("deliveryAddress").value;
+        const mobile = document.getElementById("customerMobile").value;
         if (globalTotal === 0) {
             alert("దయచేసి మెనూ నుండి ఏదైనా ఒక ఐటమ్ సెలెక్ట్ చేసుకోండి!");
+            return;
+        }
+        if (!mobile.trim()) {
+            alert("దయచేసి మీ మొబైల్ నెంబర్ నమోదు చేయండి!");
             return;
         }
         if (!address.trim()) {
@@ -288,13 +297,13 @@
         const itemsSummary = orderedItems.join(", ");
 
         if (mode === "ONLINE") {
-            // 🔄 డయాగ్రామ్ ప్రకారం: UPI సెలెక్ట్ చేస్తే మొదట ఫోన్‌పే యాప్‌ను ట్రిగ్గర్ చేయడం
+            // 🔄 UPI సెలెక్ట్ చేస్తే మొదట ఫోన్‌పే యాప్‌ను ట్రిగ్గర్ చేయడం
             const myUpiId = "nbommali52@ybl"; 
             const upiUrl = `upi://pay?pa=${myUpiId}&pn=NGFoods&am=${globalTotal}&cu=INR&tn=PalletooruRuchuluOrder`;
             
             window.location.href = upiUrl;
 
-            // 🔄 అదే సమయంలో (Same Time) బ్యాక్-ఎండ్ కి డేటా పంపి సేవ్ చేయడం
+            // 🔄 అదే సమయంలో బ్యాక్-ఎండ్ కి డేటా పంపి సేవ్ చేయడం
             setTimeout(() => {
                 saveOrderAndProceed(currentUser, address, itemsSummary, globalTotal, "ONLINE", "COMPLETED");
             }, 3000);
@@ -307,10 +316,11 @@
     // Spring Boot API కి డేటా పంపడం
     function saveOrderAndProceed(name, addr, items, total, payMode, payStatus) {
         const txnId = payMode === "ONLINE" ? "TXN" + Math.floor(100000 + Math.random() * 900000) : "N/A";
+        const mobile = document.getElementById("customerMobile").value;
 
         const payload = {
             customerName: name,
-            customerMobile: "9876543210", 
+            customerMobile: mobile, 
             address: addr,
             orderDetails: items,
             totalAmount: total,
@@ -351,6 +361,7 @@
         const msg = `🔔 *పాలేటూరు రుచులు - కొత్త ఆర్డర్ వచ్చినది!* 🔔\n\n` +
                     `📝 *ఆర్డర్ ID:* #${savedOrderResponse.id}\n` +
                     `👤 *కస్టమర్ పేరు:* ${savedOrderResponse.customerName}\n` +
+                    `📞 *మొబైల్ నంబర్:* ${savedOrderResponse.customerMobile}\n` +
                     `🏠 *అడ్రస్:* ${savedOrderResponse.address}\n` +
                     `📦 *వంటకాలు:* ${savedOrderResponse.orderDetails}\n` +
                     `💰 *మొత్తం బిల్లు:* ₹${savedOrderResponse.totalAmount}/-\n` +
