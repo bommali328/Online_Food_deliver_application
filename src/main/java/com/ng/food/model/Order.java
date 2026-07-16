@@ -16,7 +16,7 @@ public class Order {
 	@Column(length = 500)
 	private String address;
 
-	@Column(length = 500)
+	@Column(length = 1000)
 	private String orderDetails;
 
 	private double totalAmount;

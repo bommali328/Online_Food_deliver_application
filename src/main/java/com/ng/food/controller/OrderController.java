@@ -9,10 +9,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "*") // Render లో క్రాస్-ఆరిజిన్ ప్రాబ్లం రాకుండా
+@CrossOrigin(origins = "*") // CORS ఇష్యూస్ రాకుండా ఉండడానికి
 public class OrderController {
 
-	// బ్రౌజర్ కి డైరెక్ట్ గా HTML ఫైల్స్ ని రూట్ చేయడం కోసం
+	@Autowired
+	private OrderRepository orderRepository;
+
+	// HTML పేజీలకు డైరెక్ట్ రూటింగ్
 	@GetMapping("/login.html")
 	public String loginPage() {
 		return "forward:/login.html";
@@ -28,17 +31,14 @@ public class OrderController {
 		return "forward:/owner.html";
 	}
 
-	@Autowired
-	private OrderRepository orderRepository;
-
-	// 1. కస్టమర్ కొత్త ఆర్డర్ పెట్టినప్పుడు సేవ్ చేసే API
+	// 1. కస్టమర్ కొత్త ఆర్డర్ పెట్టినప్పుడు డేటాబేస్ లో సేవ్ చేసే POST API
 	@PostMapping("/api/orders")
 	public ResponseEntity<Order> placeOrder(@RequestBody Order order) {
 		Order savedOrder = orderRepository.save(order);
 		return ResponseEntity.ok(savedOrder);
 	}
 
-	// 2. ఓనర్ డ్యాష్‌బోర్డ్ లో అన్ని ఆర్డర్లను చూపించే API
+	// 2. ఓనర్ డ్యాష్‌బోర్డ్ లో అన్ని ఆర్డర్లను చూపించే GET API
 	@GetMapping("/api/orders/all")
 	public ResponseEntity<List<Order>> getAllOrdersForOwner() {
 		List<Order> orders = orderRepository.findAll();

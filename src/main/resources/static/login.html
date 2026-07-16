@@ -1,37 +1,47 @@
-<!DOCTYPE html>
-<html lang="te">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NG Foods - లాగిన్ / సైన్అప్</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f7fafc; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .auth-card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
-        h2 { color: #2b6cb0; margin-bottom: 20px; }
-        input { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #e2e8f0; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background-color: #2b6cb0; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        button:hover { background-color: #2c5282; }
-    </style>
-</head>
-<body>
-<div class="auth-card">
-    <h2>🍔 NG Foods కి స్వాగతం</h2>
-    <input type="text" id="username" placeholder="యూజర్ నేమ్ (Name)" value="Naveen">
-    <input type="password" id="password" placeholder="పాస్‌వర్డ్" value="123456">
-    <button onclick="handleLogin()">లాగిన్ అవ్వండి</button>
-</div>
-<script>
-    function handleLogin() {
-        const user = document.getElementById("username").value;
-        if(user.trim() !== "") {
-            // లాగిన్ అయిన యూజర్ పేరును బ్రౌజర్ మెమరీలో సేవ్ చేస్తున్నాం
-            localStorage.setItem("loggedInUser", user);
-            // డైరెక్ట్ గా మెయిన్ మెనూ (index.html) కి పంపుతున్నాం
-            window.location.href = "index.html";
-        } else {
-            alert("దయచేసి సరైన వివరాలు ఇవ్వండి!");
-        }
-    }
-</script>
-</body>
-</html>
+package com.ng.food.controller;
+
+import com.ng.food.model.Order;
+import com.ng.food.repository.OrderRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@CrossOrigin(origins = "*") // CORS ఇష్యూస్ రాకుండా ఉండడానికి
+public class OrderController {
+
+@Autowired
+private OrderRepository orderRepository;
+
+// HTML పేజీలకు డైరెక్ట్ రూటింగ్
+@GetMapping("/login.html")
+public String loginPage() {
+return "forward:/login.html";
+}
+
+@GetMapping("/index.html")
+public String indexPage() {
+return "forward:/index.html";
+}
+
+@GetMapping("/owner.html")
+public String ownerPage() {
+return "forward:/owner.html";
+}
+
+// 1. కస్టమర్ కొత్త ఆర్డర్ పెట్టినప్పుడు డేటాబేస్ లో సేవ్ చేసే POST API
+@PostMapping("/api/orders")
+public ResponseEntity<Order> placeOrder(@RequestBody Order order) {
+	Order savedOrder = orderRepository.save(order);
+	return ResponseEntity.ok(savedOrder);
+	}
+
+	// 2. ఓనర్ డ్యాష్‌బోర్డ్ లో అన్ని ఆర్డర్లను చూపించే GET API
+	@GetMapping("/api/orders/all")
+	public ResponseEntity<List<Order>> getAllOrdersForOwner() {
+		List<Order> orders = orderRepository.findAll();
+			return ResponseEntity.ok(orders);
+			}
+			}

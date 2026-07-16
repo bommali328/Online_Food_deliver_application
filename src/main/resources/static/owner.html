@@ -129,31 +129,25 @@
 	</div>
 
 	<script>
-		// పేజీ ఓపెన్ అవ్వగానే ఆర్డర్లన్నీ లోడ్ అవ్వడానికి
 		document.addEventListener("DOMContentLoaded", loadAllOrders);
 
 		function loadAllOrders() {
 			const ordersList = document.getElementById("ordersList");
 			ordersList.innerHTML = "<tr><td colspan='8' style='text-align:center;'>ఆర్డర్స్ లోడ్ అవుతున్నాయి...</td></tr>";
 
-			// నీ లైవ్ రెండర్ సర్వర్ URL నుండి డేటా తెచ్చుకుంటుంది
 			fetch('https://food-application-backend-1.onrender.com/api/orders/all')
 				.then(response => response.json())
 				.then(orders => {
-					ordersList.innerHTML = ""; // క్లియర్ చేయడం
+					ordersList.innerHTML = "";
 
 					if (orders.length === 0) {
 						ordersList.innerHTML = "<tr><td colspan='8' style='text-align:center;'>ప్రస్తుతానికి ఎలాంటి ఆర్డర్లు లేవు!</td></tr>";
 						return;
 					}
 
-					// ఆర్డర్లను రివర్స్ లో చూపిస్తాం (కొత్త ఆర్డర్ పైన కనిపిస్తుంది)
 					orders.reverse().forEach(order => {
 						const tr = document.createElement("tr");
-
-						// పేమెంట్ స్టేటస్ కి కలర్ క్లాస్ డిసైడ్ చేయడం
 						const statusClass = order.paymentStatus === "COMPLETED" ? "status-completed" : "status-pending";
-						// పేమెంట్ మోడ్ బ్యాడ్జ్
 						const modeClass = order.paymentMode === "ONLINE" ? "badge-online" : "badge-cod";
 
 						tr.innerHTML = `
@@ -163,7 +157,7 @@
                         <span style="color:#718096;">📞 ${order.customerMobile}</span>
                     </td>
                     <td>${order.address || 'N/A'}</td>
-                    <td>${order.orderDetails || 'చికెన్ బిరియానీ కాంబో'}</td>
+                    <td>${order.orderDetails || 'N/A'}</td>
                     <td><strong style="color:#2b6cb0;">₹${order.totalAmount}/-</strong></td>
                     <td><span class="${modeClass}">${order.paymentMode}</span></td>
                     <td style="font-family:monospace; color:#4a5568;">${order.transactionId || 'N/A'}</td>
